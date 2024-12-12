@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../pages/dashboard.dart';
 import '../pages/labor_page.dart';
 import '../pages/add_labor_page.dart';
+import '../pages/project_list_page.dart';
 
 class DrawerWidget extends StatelessWidget {
   const DrawerWidget({Key? key}) : super(key: key);
@@ -56,6 +57,18 @@ class DrawerWidget extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) => const AddLaborPage()),
+                );
+              },
+            ),
+            _buildDrawerItem(
+              context,
+              icon: Icons.work,
+              title: 'Projects',
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProjectPage()),
                 );
               },
             ),

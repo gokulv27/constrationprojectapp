@@ -2,20 +2,20 @@ import 'package:flutter/material.dart';
 import '../models/project.dart';
 import '../api/project_api.dart';
 import '../widget/drawer_widget.dart';
+import 'project_details_page.dart';
 
-class ProjectListPage extends StatefulWidget {
-  const ProjectListPage({Key? key}) : super(key: key);
+class ProjectPage extends StatefulWidget {
+  const ProjectPage({Key? key}) : super(key: key);
 
   @override
-  _ProjectListPageState createState() => _ProjectListPageState();
+  _ProjectPageState createState() => _ProjectPageState();
 }
 
-class _ProjectListPageState extends State<ProjectListPage> {
-  List<Project> _projects = [];
-  List<Project> _filteredProjects = [];
+class _ProjectPageState extends State<ProjectPage> {
+  late List<Project> _projects;
+  late List<Project> _filteredProjects;
   bool _isLoading = false;
   final TextEditingController _searchController = TextEditingController();
-  Set<String> _selectedProjects = {};
 
   @override
   void initState() {
@@ -45,47 +45,37 @@ class _ProjectListPageState extends State<ProjectListPage> {
     } catch (e) {
       print('Error fetching projects: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to load projects')),
+        SnackBar(
+          content: Text('Failed to load projects: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
 
   void _filterProjects(String query) {
     setState(() {
-      _filteredProjects = _projects.where((project) {
-        return project.name.toLowerCase().contains(query.toLowerCase()) ||
-            project.id.toLowerCase().contains(query.toLowerCase());
-      }).toList();
-    });
-  }
-
-  void _toggleProjectSelection(String projectId) {
-    setState(() {
-      if (_selectedProjects.contains(projectId)) {
-        _selectedProjects.remove(projectId);
+      if (query.isEmpty) {
+        _filteredProjects = _projects;
       } else {
-        _selectedProjects.add(projectId);
+        _filteredProjects = _projects.where((project) {
+          final projectName = project.projectName.toLowerCase();
+          final clientName = project.clientName.toLowerCase();
+          return projectName.contains(query.toLowerCase()) ||
+              clientName.contains(query.toLowerCase());
+        }).toList();
       }
     });
-  }
-
-  void _addProject() async {
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AddProjectPage()),
-    );
-    if (result == true) _fetchProjects();
-  }
-
-  void _navigateToProjectDetails(Project project) {
-    // TODO: Implement navigation to Project Details Page
-    print('Navigating to details of project: ${project.id}');
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Project List', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'Project Management',
+          style: TextStyle(color: Colors.white),
+        ),
         iconTheme: const IconThemeData(color: Colors.white),
         backgroundColor: Colors.black,
       ),
@@ -101,7 +91,7 @@ class _ProjectListPageState extends State<ProjectListPage> {
                 onChanged: _filterProjects,
                 style: const TextStyle(color: Colors.white),
                 decoration: InputDecoration(
-                  hintText: 'Search projects',
+                  hintText: 'Search projects or clients',
                   hintStyle: TextStyle(color: Colors.grey[400]),
                   prefixIcon: Icon(Icons.search, color: Colors.grey[400]),
                   filled: true,
@@ -136,39 +126,66 @@ class _ProjectListPageState extends State<ProjectListPage> {
                       vertical: 8,
                     ),
                     child: ListTile(
-                      leading: Checkbox(
-                        value: _selectedProjects.contains(project.id),
-                        onChanged: (_) => _toggleProjectSelection(project.id),
-                        activeColor: Colors.green,
-                      ),
-                      title: Text(
-                        project.name,
-                        style: const TextStyle(color: Colors.white, fontSize: 16),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProjectDetailsPage(project: project),
+                          ),
+                        );
+                      },
+                      title: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              project.projectName,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: project.activeStatus
+                                  ? Colors.green
+                                  : Colors.red,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              project.activeStatus
+                                  ? 'Active'
+                                  : 'Inactive',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       subtitle: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'ID: ${project.id}',
-                            style: const TextStyle(color: Colors.grey),
+                            'Client: ${project.clientName}',
+                            style:
+                            const TextStyle(color: Colors.grey),
+                          ),
+                          Text(
+                            'Budget: ₹${project.budget.toStringAsFixed(2)}',
+                            style:
+                            const TextStyle(color: Colors.grey),
                           ),
                           Text(
                             'Location: ${project.location}',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            'Start Date: ${project.startDate}',
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                          Text(
-                            'Status: ${project.status}',
-                            style: TextStyle(
-                              color: project.status == 'Ongoing' ? Colors.green : Colors.orange,
-                            ),
+                            style:
+                            const TextStyle(color: Colors.grey),
                           ),
                         ],
                       ),
-                      onTap: () => _navigateToProjectDetails(project),
                     ),
                   );
                 },
@@ -176,11 +193,6 @@ class _ProjectListPageState extends State<ProjectListPage> {
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _addProject,
-        backgroundColor: Colors.green,
-        child: const Icon(Icons.add, color: Colors.white),
       ),
     );
   }
