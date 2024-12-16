@@ -4,9 +4,8 @@ class LaborToProject {
   final String laborName;
   final String skill;
   final String startDate;
-  final String? endDate; // Optional field
-  final double wagesPerDay;
-  final double pendingAmount;
+  final String? endDate; // Nullable field
+  final int project; // Added the project field
 
   LaborToProject({
     required this.id,
@@ -15,8 +14,7 @@ class LaborToProject {
     required this.skill,
     required this.startDate,
     this.endDate,
-    required this.wagesPerDay,
-    required this.pendingAmount,
+    required this.project,
   });
 
   factory LaborToProject.fromJson(Map<String, dynamic> json) {
@@ -26,9 +24,8 @@ class LaborToProject {
       laborName: json['labor_name'] ?? 'Unknown',
       skill: json['skill'] ?? 'Unknown',
       startDate: json['start_date'] ?? '',
-      endDate: json['end_date'],
-      wagesPerDay: (json['wages_per_day'] as num).toDouble(),
-      pendingAmount: (json['pending_amount'] as num).toDouble(),
+      endDate: json['end_date'], // This is nullable
+      project: json['project'] as int, // Parse the project field
     );
   }
 }

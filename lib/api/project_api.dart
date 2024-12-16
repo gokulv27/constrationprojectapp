@@ -7,7 +7,7 @@ class ProjectApi {
 
 
   static Future<List<Project>> getProjectList() async {
-    final response = await http.get(Uri.parse('$baseUrl/project/'));
+    final response = await http.get(Uri.parse('$baseUrl/api/project/'));
 
     if (response.statusCode == 200) {
       return parseProjects(response.body);
@@ -18,7 +18,7 @@ class ProjectApi {
 
   static Future<Project> createProject(Project project) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/create/'),
+      Uri.parse('$baseUrl/api/project/create/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -34,7 +34,7 @@ class ProjectApi {
 
   static Future<Project> updateProject(int id, Project project) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/$id/update/'),
+      Uri.parse('$baseUrl/api/$id/update/'),
       headers: <String, String>{
         'Content-Type': 'application/json; charset=UTF-8',
       },
@@ -50,7 +50,7 @@ class ProjectApi {
 
   static Future<void> deleteProject(int id) async {
     final response = await http.delete(
-      Uri.parse('$baseUrl/$id/delete/'),
+      Uri.parse('$baseUrl/api/$id/delete/'),
     );
 
     if (response.statusCode != 204) {

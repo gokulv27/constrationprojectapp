@@ -12,7 +12,7 @@ class LaborApi {
   static Future<List<Labor>> getLaborList() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/labour/'),
+        Uri.parse('$baseUrl/api/labour/'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -31,7 +31,7 @@ class LaborApi {
   static Future<Labor> createLabor(Labor labor) async {
     try {
       final response = await http.post(
-        Uri.parse('$baseUrl/labour/create/'),
+        Uri.parse('$baseUrl/api/labour/create/'),
         headers: {'Content-Type': 'application/json'},
         body: json.encode(labor.toJson()),
       );
@@ -50,7 +50,7 @@ class LaborApi {
   static Future<Labor> updateLabor(Labor labor) async {
     try {
       final response = await http.put(
-        Uri.parse('$baseUrl/labour/${labor.id}/update/'), // Use the ID in the URL
+        Uri.parse('$baseUrl/api/labour/${labor.id}/update/'), // Use the ID in the URL
         headers: {'Content-Type': 'application/json'},
         body: json.encode(labor.toJson()),
       );
@@ -70,7 +70,7 @@ class LaborApi {
   static Future<void> deleteLabor(int id) async {
     try {
       final response = await http.delete(
-        Uri.parse('$baseUrl/labour/$id/delete/'),
+        Uri.parse('$baseUrl/api/labour/$id/delete/'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -86,7 +86,7 @@ class LaborApi {
   static Future<List<LaborSkill>> getSkills() async {
     try {
       final response = await http.get(
-        Uri.parse('$baseUrl/master/skill/'),
+        Uri.parse('$baseUrl/api/master/skill/'),
         headers: {'Content-Type': 'application/json'},
       );
 

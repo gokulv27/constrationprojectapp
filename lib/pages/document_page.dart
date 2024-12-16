@@ -7,7 +7,6 @@ import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_pdfview/flutter_pdfview.dart';
-
 import 'package:permission_handler/permission_handler.dart';
 
 class DocumentPage extends StatefulWidget {
@@ -20,7 +19,6 @@ class DocumentPage extends StatefulWidget {
 }
 
 class _DocumentPageState extends State<DocumentPage> {
-
   final DocumentService _documentService = DocumentService();
   List<Document> _documents = [];
   bool _isLoading = true;
@@ -35,7 +33,8 @@ class _DocumentPageState extends State<DocumentPage> {
   Future<void> _loadDocuments() async {
     setState(() => _isLoading = true);
     try {
-      final documents = await _documentService.getProjectDocuments(widget.projectId);
+      final documents =
+      await _documentService.getProjectDocuments(widget.projectId);
       setState(() {
         _documents = documents;
         _isLoading = false;
@@ -103,93 +102,47 @@ class _DocumentPageState extends State<DocumentPage> {
     if (await Permission.storage.request().isGranted) {
       // Permission is granted
     } else {
-      // Handle the case when permission is not granted
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Storage permission is required to pick files')),
+        SnackBar(content: Text('Storage permission is required')),
       );
     }
   }
 
   Future<void> _uploadDocumentManually() async {
     await _requestPermissions();
-    /*
-    try {
-      // Pick a file
 
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf'],
-      );
-
-      if (result != null) {
-        // Get the file path
-        String? filePath = result.files.single.path;
-
-        if (filePath != null) {
-          // Upload the file
-          bool uploadSuccess = await _uploadFileToServer(filePath);
-
-          if (uploadSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('File uploaded successfully')),
-            );
-            _loadDocuments();
-          } else {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Failed to upload file')),
-            );
-          }
-        }
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error picking file: $e')),
-      );
-    }
-
-     */
+    // Use FilePicker to pick a document (if FilePicker is included)
+    // FilePickerResult? result = await FilePicker.platform.pickFiles(
+    //   type: FileType.custom,
+    //   allowedExtensions: ['pdf'],
+    // );
+    // if (result != null && result.files.single.path != null) {
+    //   String filePath = result.files.single.path!;
+    //   bool success = await _uploadFileToServer(filePath);
+    //   if (success) _loadDocuments();
+    // }
   }
+
   Future<bool> _uploadFileToServer(String filePath) async {
     try {
-      // Create a multipart request
-      var request = http.MultipartRequest(
-          'POST',
-          Uri.parse('http://10.0.2.2:8000/api/projects/documents/upload/')
+      final fileName = filePath.split('/').last;
+      await _documentService.uploadDocument(
+        projectId: widget.projectId,
+        file: File(filePath),
+        fileName: fileName,
       );
-
-      // Add the project ID to the request
-      request.fields['project_id'] = widget.projectId.toString();
-
-      // Add the file to the request
-      request.files.add(await http.MultipartFile.fromPath(
-          'document',
-          filePath,
-          filename: filePath.split('/').last
-      ));
-
-      // Send the request
-      var response = await request.send();
-
-      // Check the response status
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        // Successfully uploaded
-        return true;
-      } else {
-        // Handle error
-        String responseBody = await response.stream.bytesToString();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Upload failed: ${response.statusCode} - $responseBody')),
-        );
-        return false;
-      }
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('File uploaded successfully')),
+      );
+      return true;
     } catch (e) {
-      // Handle any exceptions during upload
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Error uploading file: $e')),
       );
       return false;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -204,7 +157,9 @@ class _DocumentPageState extends State<DocumentPage> {
       body: Container(
         color: Colors.grey[900],
         child: _isLoading
-            ? const Center(child: CircularProgressIndicator(color: Colors.green))
+            ? const Center(
+          child: CircularProgressIndicator(color: Colors.green),
+        )
             : _documents.isEmpty
             ? const Center(
           child: Text(
@@ -221,7 +176,7 @@ class _DocumentPageState extends State<DocumentPage> {
               color: Colors.grey[800],
               child: ListTile(
                 title: Text(
-                  document.fileName,
+                  document.documentName,
                   style: const TextStyle(color: Colors.white),
                 ),
                 subtitle: Text(
@@ -232,16 +187,15 @@ class _DocumentPageState extends State<DocumentPage> {
                   mainAxisSize: MainAxisSize.min,
                   children: [
                     IconButton(
-                      icon: const Icon(Icons.visibility, color: Colors.blue),
-                      onPressed: () {
-                        _viewPDF(document.fileUrl);
-                      },
+                      icon: const Icon(Icons.visibility,
+                          color: Colors.blue),
+                      onPressed: () => _viewPDF(document.fileUrl),
                     ),
                     IconButton(
-                      icon: const Icon(Icons.download, color: Colors.green),
-                      onPressed: () {
-                        _downloadPDF(document.fileUrl, document.fileName);
-                      },
+                      icon: const Icon(Icons.download,
+                          color: Colors.green),
+                      onPressed: () =>
+                          _downloadPDF(document.fileUrl, document.documentName),
                     ),
                   ],
                 ),
@@ -282,17 +236,13 @@ class PDFViewerPage extends StatelessWidget {
         swipeHorizontal: true,
         autoSpacing: false,
         pageFling: false,
-        onRender: (_pages) {
-          // You can perform actions when the PDF is rendered
-        },
+        onRender: (_pages) {},
         onError: (error) {
-          // Handle errors here
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error loading PDF: $error')),
           );
         },
         onPageError: (page, error) {
-          // Handle page errors here
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error on page $page: $error')),
           );

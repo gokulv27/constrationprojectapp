@@ -3,6 +3,7 @@ import '../widget/report_labor_bottom_nav_bar.dart';
 import '../models/labor_to_project.dart';
 import '../api/labor_to_project_api.dart';
 
+
 class LaborReportScreen extends StatefulWidget {
   final int projectId;
 
@@ -27,8 +28,13 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
 
   Future<void> _fetchLaborList() async {
     setState(() => _isLoading = true);
+
+    // Create an instance of LaborToProjectApi
+    final api = LaborToProjectApi();
+
     try {
-      final laborList = await LaborToProjectApi.getLaborForProject(widget.projectId);
+      // Call the instance method
+      final laborList = await api.getLaborForProject(widget.projectId);
       setState(() {
         _laborList = laborList;
         _selectedLabors = {for (var labor in laborList) labor.id: false};
@@ -41,6 +47,7 @@ class _LaborReportScreenState extends State<LaborReportScreen> {
       setState(() => _isLoading = false);
     }
   }
+
 
   void _onNavBarTap(int index) {
     setState(() {

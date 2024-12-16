@@ -100,15 +100,15 @@ class _AddLaborPageState extends State<AddLaborPage> {
         id: widget.labor?.id ?? 0,
         name: _nameController.text,
         phoneNo: _phoneController.text,
-        skillId: _selectedSkill!.id,
-        skillName: _selectedSkill!.name,
+        skillId: _selectedSkill?.id ?? 0, // Default to 0 if null
+        skillName: _selectedSkill?.name ?? 'Unknown',
         aadharNo: _aadharController.text,
         emergencyContactNumber: _emergencyContactController.text,
         address: _addressController.text,
         city: _cityController.text,
-        state: _selectedState!,
+        state: _selectedState ?? 'Unknown', // Default to 'Unknown' if null
         pincode: _pincodeController.text,
-        dailyWages: double.parse(_dailyWagesController.text),
+        dailyWages: double.tryParse(_dailyWagesController.text) ?? 0.0,
         createdAt: widget.labor?.createdAt ?? DateTime.now(),
         updatedAt: DateTime.now(),
       );
@@ -133,6 +133,7 @@ class _AddLaborPageState extends State<AddLaborPage> {
       );
     }
   }
+
 
   InputDecoration _getInputDecoration(String label) {
     return InputDecoration(

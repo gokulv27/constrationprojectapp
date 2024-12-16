@@ -62,7 +62,7 @@ class DrawerWidget extends StatelessWidget {
             ),
             _buildDrawerItem(
               context,
-              icon: Icons.work,
+              icon: Icons.add_home_work,
               title: 'Projects',
               onTap: () {
                 Navigator.pop(context);
